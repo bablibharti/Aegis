@@ -16,6 +16,7 @@ app.add_middleware(
 def root():
     return {"message": "Aegis AI backend is running"}
 
+
 @app.get("/health")
 def health_check():
     return {"status": "ok", "project": "aegis-professional-rebuild"}
