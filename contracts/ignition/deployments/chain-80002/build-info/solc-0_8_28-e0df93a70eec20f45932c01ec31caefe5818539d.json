@@ -1,0 +1,49 @@
+{
+  "_format": "hh3-sol-build-info-1",
+  "id": "solc-0_8_28-e0df93a70eec20f45932c01ec31caefe5818539d",
+  "solcVersion": "0.8.28",
+  "solcLongVersion": "0.8.28+commit.7893614a",
+  "compilerType": "solc",
+  "toolVersions": {
+    "hardhat": "3.13.0"
+  },
+  "userSourceNameMap": {
+    "contracts/AegisConsent.sol": "project/contracts/AegisConsent.sol"
+  },
+  "input": {
+    "language": "Solidity",
+    "settings": {
+      "evmVersion": "cancun",
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ],
+          "*": [
+            "abi",
+            "evm.bytecode.linkReferences",
+            "evm.bytecode.object",
+            "evm.bytecode.opcodes",
+            "evm.bytecode.sourceMap",
+            "evm.deployedBytecode.immutableReferences",
+            "evm.deployedBytecode.linkReferences",
+            "evm.deployedBytecode.object",
+            "evm.deployedBytecode.opcodes",
+            "evm.deployedBytecode.sourceMap",
+            "evm.methodIdentifiers"
+          ]
+        }
+      },
+      "remappings": []
+    },
+    "sources": {
+      "project/contracts/AegisConsent.sol": {
+        "content": "// SPDX-License-Identifier: MIT\r\npragma solidity ^0.8.20;\r\n\r\n/// @title Aegis AI - Consent & Record Integrity Contract\r\n/// @notice Stores record hashes (not raw data) and manages doctor consent per patient.\r\ncontract AegisConsent {\r\n    struct RecordInfo {\r\n        bytes32 recordHash;\r\n        uint256 timestamp;\r\n        address uploadedBy;\r\n    }\r\n\r\n    // patientId => recordId => RecordInfo\r\n    mapping(string => mapping(string => RecordInfo)) private records;\r\n\r\n    // patientId => doctorAddress => hasConsent\r\n    mapping(string => mapping(address => bool)) private consents;\r\n\r\n    event RecordHashStored(string indexed patientId, string indexed recordId, bytes32 recordHash, address uploadedBy);\r\n    event ConsentGranted(string indexed patientId, address indexed doctor);\r\n    event ConsentRevoked(string indexed patientId, address indexed doctor);\r\n    event AccessLogged(string indexed recordId, address indexed accessor, uint256 timestamp);\r\n\r\n    /// @notice Stores the hash of a medical record on-chain (not the record itself).\r\n    function storeRecordHash(string memory patientId, string memory recordId, bytes32 recordHash) external {\r\n        records[patientId][recordId] = RecordInfo({\r\n            recordHash: recordHash,\r\n            timestamp: block.timestamp,\r\n            uploadedBy: msg.sender\r\n        });\r\n\r\n        emit RecordHashStored(patientId, recordId, recordHash, msg.sender);\r\n    }\r\n\r\n    /// @notice Returns the stored hash for a given patient's record, so it can be compared off-chain.\r\n    function getRecordHash(string memory patientId, string memory recordId) external view returns (bytes32) {\r\n        return records[patientId][recordId].recordHash;\r\n    }\r\n\r\n    /// @notice Grants a doctor consent to access a patient's records.\r\n    function grantConsent(string memory patientId, address doctor) external {\r\n        consents[patientId][doctor] = true;\r\n        emit ConsentGranted(patientId, doctor);\r\n    }\r\n\r\n    /// @notice Revokes a doctor's consent to access a patient's records.\r\n    function revokeConsent(string memory patientId, address doctor) external {\r\n        consents[patientId][doctor] = false;\r\n        emit ConsentRevoked(patientId, doctor);\r\n    }\r\n\r\n    /// @notice Checks whether a doctor currently has consent for a patient.\r\n    function hasConsent(string memory patientId, address doctor) external view returns (bool) {\r\n        return consents[patientId][doctor];\r\n    }\r\n\r\n    /// @notice Logs that someone accessed a record - emits an event for the audit trail.\r\n    function logAccess(string memory recordId) external {\r\n        emit AccessLogged(recordId, msg.sender, block.timestamp);\r\n    }\r\n}\r\n"
+      }
+    }
+  }
+}
