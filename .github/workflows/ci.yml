@@ -106,10 +106,9 @@ jobs:
 
 
   docker-build:
-    name: Docker Build Check
+    name: Docker Build & Push
     runs-on: ubuntu-latest
     needs: [backend-lint-test, contracts-test, frontend-test]
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -119,3 +118,22 @@ jobs:
 
       - name: Build frontend image
         run: docker build -t aegis-frontend:ci ./frontend
+
+      - name: Log in to Docker Hub
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Tag and push backend image
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          docker tag aegis-backend:ci ${{ secrets.DOCKERHUB_USERNAME }}/aegis-backend:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/aegis-backend:latest
+
+      - name: Tag and push frontend image
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          docker tag aegis-frontend:ci ${{ secrets.DOCKERHUB_USERNAME }}/aegis-frontend:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/aegis-frontend:latest
