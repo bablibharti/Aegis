@@ -17,3 +17,5 @@ dist/
 .vscode/
 .idea/
 backend/chroma_data/
+aegisdocs.docx
+backend/.coverage
