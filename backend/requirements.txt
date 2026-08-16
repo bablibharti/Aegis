@@ -106,7 +106,6 @@ python-jose==3.5.0
 python-multipart==0.0.32
 pytokens==0.4.1
 pyunormalize==17.0.0
-pywin32==312
 PyYAML==6.0.3
 redis==8.1.0
 referencing==0.37.0
